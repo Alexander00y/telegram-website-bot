@@ -1,20 +1,38 @@
-name: Deploy to Vercel
-on: push
+name: Deploy Website to Vercel
+on:
+  push:
+    paths:
+      - 'site.zip' # Запускаем только при изменении этого файла
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:  # Добавьте этот блок!
+    env:
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      MY_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
       GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
+    
     steps:
-      - uses: actions/checkout@v2
-      - name: Extract ZIP
-        run: |
-          unzip site.zip -d site/
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v20
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          node-version: 18
+
+      - name: Extract website files
+        run: |
+          unzip -o site.zip -d site/
+          rm site.zip # Удаляем архив после распаковки
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy to Vercel
+        run: |
+          vercel --token ${{ secrets.VERCEL_TOKEN }} \
+                 --scope ${{ secrets.VERCEL_ORG_ID }} \
+                 --confirm \
+                 --prod
+        working-directory: ./site
