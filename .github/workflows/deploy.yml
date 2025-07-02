@@ -3,6 +3,10 @@ on: push
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:  # Добавьте этот блок!
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
     steps:
       - uses: actions/checkout@v2
       - name: Extract ZIP
